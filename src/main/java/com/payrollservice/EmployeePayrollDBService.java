@@ -104,7 +104,7 @@ public class EmployeePayrollDBService {
     }
 
     public boolean checkEmployeePayrollInSyncWithDB(String name) {
-        EmployeePayrollDBService employeePayrollDBService;
+        EmployeePayrollDBService employeePayrollDBService = null;
         List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeePayrollData(name);
         return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
 
@@ -114,4 +114,21 @@ public class EmployeePayrollDBService {
         return null;
 
     }
-}
+
+    public List<EmployeePayrollData> readEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = String.format("SELECT * FROM employee_payroll1 WHERE START BETWEEN '%s' AND '%s';", Date.valueOf(startDate), Date.valueOf(endDate));
+        return this.getEmployeePayrollDataUsingDB(sql);
+    }
+
+    private List<EmployeePayrollData> getEmployeePayrollDataUsingDB(String sql) {
+        List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
+        try (Connection connection = this.getConnection()) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            employeePayrollList = this.getEmployeePayrollData(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employeePayrollList;
+    }
+} 
